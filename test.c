@@ -10,7 +10,10 @@ int main(int argc, char *argv[]) {
         printf("Usage: %s [dev] [src_lsn] [# of sectors]\n", argv[0]);
         return 1;
     }
-    init_mapview(argv[1], 4096);
+    if (0 != init_mapview(argv[1], 4096)) {
+        printf("Can not init mapview\n");
+        return 2;
+    }
     start_sector = atoi(argv[2]);
     sector_count = atoi(argv[3]);
 

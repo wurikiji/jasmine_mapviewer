@@ -350,11 +350,7 @@ const UINT8 ata_command_code_table[] =
 const ATA_FUNCTION_T ata_function_table[] =
 {
 	ata_nop,							// NOP
-#if 0
-	ata_swat,   		/// ogh ( for trim command used as SWAT )
-#else
 	(ATA_FUNCTION_T) INVALID32,			// DATA SET MANAGEMENT
-#endif
 	(ATA_FUNCTION_T) INVALID32,			// DEVICE RESET
 	ata_recalibrate,					// RECALIBRATE
 	(ATA_FUNCTION_T) INVALID32,			// READ DMA EXT

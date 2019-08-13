@@ -43,7 +43,7 @@ void ata_check_power_mode(UINT32 lba, UINT32 sector_count)
 
 void ata_flush_cache(UINT32 lba, UINT32 sector_count)
 {
-	ftl_flush(__func__);
+	// ftl_flush(__func__);
 	send_status_to_host(0);
 }
 
@@ -60,9 +60,6 @@ void ata_set_features(UINT32 lba, UINT32 sector_count)
 	switch (GETREG(SATA_FIS_H2D_0) >> 24)
 	{
 		case FEATURE_ENABLE_WRITE_CACHE:
-			write_count = 0; gc_count = 0 ; share_count=0; copy_back_count=0;
-			misc_share_count = 0;
-			uart_print("W1 option is received\n");
 			g_sata_context.write_cache_enabled = TRUE;
 			break;
 		case FEATURE_SET_TRANSFER_MODE:
@@ -78,8 +75,6 @@ void ata_set_features(UINT32 lba, UINT32 sector_count)
 			break;
 		case FEATURE_DISABLE_WRITE_CACHE:
 			g_sata_context.write_cache_enabled = FALSE;
-            ftl_new_format();
-			uart_print("finish formatting\n");
 			break;
 		case FEATURE_DISABLE_USE_OF_SATA:
 			if ((sector_count & 0xFF) == 0x02)
@@ -350,6 +345,5 @@ void pio_sector_transfer(UINT32 const dram_addr, UINT32 const protocol)
 
 void ata_swat(UINT32 const lba1, UINT32 const lba2)
 {
-    ftl_swat_single(lba1, lba2);
 	send_status_to_host(0);
 }

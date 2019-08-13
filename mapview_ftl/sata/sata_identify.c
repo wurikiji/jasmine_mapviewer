@@ -385,10 +385,10 @@ void ata_identify_device(UINT32 lba, UINT32 sector_count)
 	addr[100] = (UINT16) (NUM_LSECTORS & 0xFFFF);
 	addr[101] = (UINT16) (NUM_LSECTORS >> 16);
 	addr[106] = 0x4000;
-
-	// trim command 
-	addr[169] = 0x0001;
 	addr[217] = 0x0001;
+
+	// // trim command 
+	// addr[169] = 0x0001;
 
 
 	addr[255] = get_integrity_word();

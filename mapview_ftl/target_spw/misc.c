@@ -127,7 +127,7 @@ __irq void irq_handler(void)
 		if (sdram_interrupt & SDRAM_INT_ADDR_OF)
 		{
 			// There was an attempt to access beyond DRAM address boundary.
-            uart_print("Error: SDRAM interrupt occred: attempt to access beyond DRAM address boundary");
+            uart_print("Error: SDRAM interrupt occured: attempt to access beyond DRAM address boundary");
             led_blink();
 		}
 	}

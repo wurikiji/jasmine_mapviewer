@@ -128,7 +128,7 @@ static __inline void handle_got_cfis(void)
 		{
 			sector_count = 0x100;
 		}
-		if ( 0 != (fis_d1 & 0x0F000000) ) {
+		if ((cmd_type & CCL_FTL_D2H) && 0 != (fis_d1 & 0x0F000000) ) {
 			is_share = (fis_d1 >> 24);
 		}
 	}
@@ -140,7 +140,7 @@ static __inline void handle_got_cfis(void)
 		{
 			sector_count = 0x10000;
 		}
-		if ( 0 != (fis_d1 & 0x0F000000) ) {
+		if ((cmd_type & CCL_FTL_D2H) && 0 != (fis_d1 & 0x0F000000) ) {
 			is_share = (fis_d1 >> 24);
 		}
 	}
@@ -159,7 +159,7 @@ static __inline void handle_got_cfis(void)
 	} else if ((cmd_type & (CCL_FTL_H2D | CCL_FTL_D2H))) {
 		UINT32 action_flags;
 
-		SETREG(SATA_LBA, ((is_share && (cmd_type & CCL_FTL_H2D))?0x2FFFFFFF:lba));
+		SETREG(SATA_LBA, lba);
 		SETREG(SATA_SECT_CNT, sector_count);
 
 

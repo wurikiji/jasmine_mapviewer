@@ -75,7 +75,7 @@
 #define BAD_BLK_BMP_BYTES	(((NUM_VBLKS / 8) + DRAM_ECC_UNIT - 1) / DRAM_ECC_UNIT * DRAM_ECC_UNIT)
 
 #define PAGE_MAP_ADDR		(BAD_BLK_BMP_ADDR + BAD_BLK_BMP_BYTES)			// page mapping table
-#define PAGE_MAP_BYTES		((NUM_LPAGES * sizeof(UINT64) + BYTES_PER_SECTOR - 1) / BYTES_PER_SECTOR * BYTES_PER_SECTOR)
+#define PAGE_MAP_BYTES		((NUM_LPAGES * sizeof(UINT32) + BYTES_PER_SECTOR - 1) / BYTES_PER_SECTOR * BYTES_PER_SECTOR)
 
 #define VCOUNT_ADDR			(PAGE_MAP_ADDR + PAGE_MAP_BYTES)
 #define VCOUNT_BYTES		((NUM_BANKS * VBLKS_PER_BANK * sizeof(UINT16) + BYTES_PER_SECTOR - 1) / BYTES_PER_SECTOR * BYTES_PER_SECTOR)
@@ -94,8 +94,7 @@ void ftl_open(void);
 void ftl_read(UINT32 const lba, UINT32 const num_sectors);
 void ftl_write(UINT32 const lba, UINT32 const num_sectors);
 void ftl_test_write(UINT32 const lba, UINT32 const num_sectors);
-void ftl_flush(char* );
+void ftl_flush(const char* );
 void ftl_isr(void);
 void ftl_new_format();
-void ftl_swat_single(UINT32 const old, UINT32 const new_lpn);
 #endif //FTL_H

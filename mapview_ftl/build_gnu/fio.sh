@@ -1,0 +1,1 @@
+sudo fio --thread --name=randwrite --directory=./ssd --ioengine=libaio --iodepth=1 --fsync=16 --stonewall --numjobs=1 --nrfiles=500 --group_reporting --verify=0 --rw=randwrite --overwrite=1 --filesize=1M --bs=4k 

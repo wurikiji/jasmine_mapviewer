@@ -1,0 +1,19 @@
+﻿Build started 2014-03-28 오후 10:36:20.
+     1>Project "D:\Dropbox\couchbase_ftl\installer\installer.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating ".\installer.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         All outputs are up-to-date.
+       Link:
+         All outputs are up-to-date.
+         installer.vcxproj -> D:\Dropbox\couchbase_ftl\installer\.\installer.exe
+       Manifest:
+         All outputs are up-to-date.
+       FinalizeBuildStatus:
+         Deleting file ".\installer.unsuccessfulbuild".
+         Touching ".\installer.lastbuildstate".
+     1>Done Building Project "D:\Dropbox\couchbase_ftl\installer\installer.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.07

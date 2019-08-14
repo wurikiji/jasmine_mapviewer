@@ -16,37 +16,37 @@
 // along with Jasmine. See the file COPYING.
 // If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "jasmine.h"
 
-sata_context_t		g_sata_context;
-sata_ncq_t			g_sata_ncq;
-volatile UINT32		g_sata_action_flags;
+sata_context_t g_sata_context;
+sata_ncq_t g_sata_ncq;
+volatile UINT32 g_sata_action_flags;
 
-#define HW_EQ_SIZE		128
-#define HW_EQ_MARGIN	4
+#define HW_EQ_SIZE 128
+#define HW_EQ_MARGIN 4
 
 static UINT32 eventq_get_count(void)
 {
 	return (GETREG(SATA_EQ_STATUS) >> 16) & 0xFF;
 }
 
-static void eventq_get(CMD_T* cmd)
+static void eventq_get(CMD_T *cmd)
 {
 	disable_fiq();
 
-	SETREG(SATA_EQ_CTRL, 1);	// The next entry from the Event Queue is copied to SATA_EQ_DATA_0 through SATA_EQ_DATA_2.
+	SETREG(SATA_EQ_CTRL, 1); // The next entry from the Event Queue is copied to SATA_EQ_DATA_0 through SATA_EQ_DATA_2.
 
-	while ((GETREG(SATA_EQ_DATA_2) & 8) != 0);
+	while ((GETREG(SATA_EQ_DATA_2) & 8) != 0)
+		;
 
-	UINT32 EQReadData0	= GETREG(SATA_EQ_DATA_0);
-	UINT32 EQReadData1	= GETREG(SATA_EQ_DATA_1);
+	UINT32 EQReadData0 = GETREG(SATA_EQ_DATA_0);
+	UINT32 EQReadData1 = GETREG(SATA_EQ_DATA_1);
 
-	cmd->lba			= EQReadData1 & 0x3FFFFFFF;
-	cmd->sector_count	= EQReadData0 >> 16;
-	cmd->cmd_type		= EQReadData1 >> 31;
+	cmd->lba = EQReadData1 & 0x3FFFFFFF;
+	cmd->sector_count = EQReadData0 >> 16;
+	cmd->cmd_type = EQReadData1 >> 31;
 
-	if(cmd->sector_count == 0)
+	if (cmd->sector_count == 0)
 		cmd->sector_count = 0x10000;
 
 	if (g_sata_context.eq_full)
@@ -71,7 +71,7 @@ __inline ATA_FUNCTION_T search_ata_function(UINT32 command_code)
 
 	ata_function = (index == CMD_TABLE_SIZE) ? ata_not_supported : ata_function_table[index];
 
-	if (ata_function == (ATA_FUNCTION_T) INVALID32)
+	if (ata_function == (ATA_FUNCTION_T)INVALID32)
 		ata_function = ata_not_supported;
 
 	return ata_function;
@@ -93,20 +93,14 @@ void Main(void)
 			}
 			else
 			{
-				//ogh
-#if 0
-				if (is_share)
-					ftl_write(0xFFFFFFFF, cmd.sector_count);
-				else
-#endif
-					ftl_write(cmd.lba, cmd.sector_count);
+				ftl_write(cmd.lba, cmd.sector_count);
 			}
 		}
 		else if (g_sata_context.slow_cmd.status == SLOW_CMD_STATUS_PENDING)
 		{
 			void (*ata_function)(UINT32 lba, UINT32 sector_count);
 
-			slow_cmd_t* slow_cmd = &g_sata_context.slow_cmd;
+			slow_cmd_t *slow_cmd = &g_sata_context.slow_cmd;
 			slow_cmd->status = SLOW_CMD_STATUS_BUSY;
 
 			ata_function = search_ata_function(slow_cmd->code);
@@ -134,7 +128,8 @@ void sata_reset(void)
 	delay(100);
 
 	SETREG(PHY_DEBUG, 0x400A040E);
-	while ((GETREG(PHY_DEBUG) & BIT30) == 1);
+	while ((GETREG(PHY_DEBUG) & BIT30) == 1)
+		;
 
 	SETREG(SATA_BUF_PAGE_SIZE, BYTES_PER_PAGE);
 	SETREG(SATA_WBUF_BASE, (WR_BUF_ADDR - DRAM_BASE));
@@ -154,7 +149,7 @@ void sata_reset(void)
 
 	SETREG(SATA_NCQ_CTRL, AUTOINC | FLUSH_NCQ);
 	SETREG(SATA_NCQ_CTRL, AUTOINC);
-	SETREG(SATA_CFG_5, BIT12 | BIT11*BSO_RX_SSC | (BIT9|BIT10)*BSO_TX_SSC | BIT4*0x05);
+	SETREG(SATA_CFG_5, BIT12 | BIT11 * BSO_RX_SSC | (BIT9 | BIT10) * BSO_TX_SSC | BIT4 * 0x05);
 	SETREG(SATA_CFG_8, 0);
 	SETREG(SATA_CFG_9, BIT20);
 
@@ -162,18 +157,19 @@ void sata_reset(void)
 
 	SETREG(APB_INT_STS, INTR_SATA);
 
-	#if OPTION_SLOW_SATA
+#if OPTION_SLOW_SATA
 	SETREG(SATA_PHY_CTRL, 0x00000310);
-	#else
+#else
 	SETREG(SATA_PHY_CTRL, 0x00000300);
-	#endif
+#endif
 
 	SETREG(SATA_ERROR, 0xFFFFFFFF);
 	SETREG(SATA_INT_STAT, 0xFFFFFFFF);
 
 	SETREG(SATA_CTRL_1, BIT31);
 
-	while ((GETREG(SATA_INT_STAT) & PHY_ONLINE) == 0);
+	while ((GETREG(SATA_INT_STAT) & PHY_ONLINE) == 0)
+		;
 
 	SETREG(SATA_CTRL_1, BIT31 | BIT25 | BIT24);
 
@@ -192,4 +188,3 @@ void delay(UINT32 const count)
 		temp = i;
 	}
 }
-

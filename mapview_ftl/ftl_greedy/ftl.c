@@ -337,6 +337,11 @@ void ftl_read(UINT32 const lba, UINT32 const num_sectors)
     sect_offset = lba % SECTORS_PER_PAGE;
     remain_sects = num_sectors;
 
+    if (is_share)
+    {
+        uart_print("this command is mapview command");
+    }
+
     while (remain_sects != 0)
     {
         if ((sect_offset + remain_sects) < SECTORS_PER_PAGE)
@@ -348,7 +353,7 @@ void ftl_read(UINT32 const lba, UINT32 const num_sectors)
             num_sectors_to_read = SECTORS_PER_PAGE - sect_offset;
         }
         bank = get_num_bank(lpn); // page striping
-        vpn  = get_vpn(lpn);
+        vpn = get_vpn(lpn);
         CHECK_VPAGE(vpn);
 
         if (!is_share && vpn != NULL)
@@ -445,15 +450,15 @@ static void write_page(UINT32 const lpn, UINT32 const sect_offset, UINT32 const 
     UINT32 bank, old_vpn, new_vpn;
     UINT32 vblock, page_num, page_offset, column_cnt;
 
-    bank        = get_num_bank(lpn); // page striping
+    bank = get_num_bank(lpn); // page striping
     page_offset = sect_offset;
-    column_cnt  = num_sectors;
+    column_cnt = num_sectors;
 
-    new_vpn  = assign_new_write_vpn(bank);
-    old_vpn  = get_vpn(lpn);
+    new_vpn = assign_new_write_vpn(bank);
+    old_vpn = get_vpn(lpn);
 
-    CHECK_VPAGE (old_vpn);
-    CHECK_VPAGE (new_vpn);
+    CHECK_VPAGE(old_vpn);
+    CHECK_VPAGE(new_vpn);
     ASSERT(old_vpn != new_vpn);
 
     g_ftl_statistics[bank].page_wcount++;
@@ -461,7 +466,7 @@ static void write_page(UINT32 const lpn, UINT32 const sect_offset, UINT32 const 
     // if old data already exist,
     if (old_vpn != NULL)
     {
-        vblock   = old_vpn / PAGES_PER_BLK;
+        vblock = old_vpn / PAGES_PER_BLK;
         page_num = old_vpn % PAGES_PER_BLK;
 
         //--------------------------------------------------------------------------------------
@@ -528,13 +533,13 @@ static void write_page(UINT32 const lpn, UINT32 const sect_offset, UINT32 const 
         }
         // full page write
         page_offset = 0;
-        column_cnt  = SECTORS_PER_PAGE;
+        column_cnt = SECTORS_PER_PAGE;
         // invalid old page (decrease vcount)
         set_vcount(bank, vblock, get_vcount(bank, vblock) - 1);
     }
-    vblock   = new_vpn / PAGES_PER_BLK;
+    vblock = new_vpn / PAGES_PER_BLK;
     page_num = new_vpn % PAGES_PER_BLK;
-    ASSERT(get_vcount(bank,vblock) < (PAGES_PER_BLK - 1));
+    ASSERT(get_vcount(bank, vblock) < (PAGES_PER_BLK - 1));
 
     // write new data (make sure that the new data is ready in the write buffer frame)
     // (c.f FO_B_SATA_W flag in flash.h)
@@ -558,7 +563,7 @@ static UINT32 get_vpn(UINT32 const lpn)
 static void set_vpn(UINT32 const lpn, UINT32 const vpn)
 {
     CHECK_LPAGE(lpn);
-//    ASSERT(vpn >= (META_BLKS_PER_BANK * PAGES_PER_BLK) && vpn < (VBLKS_PER_BANK * PAGES_PER_BLK));
+    //    ASSERT(vpn >= (META_BLKS_PER_BANK * PAGES_PER_BLK) && vpn < (VBLKS_PER_BANK * PAGES_PER_BLK));
     write_dram_32(PAGE_MAP_ADDR + lpn * sizeof(UINT32), vpn);
 }
 
@@ -663,12 +668,12 @@ static void garbage_collection(UINT32 const bank)
 
     g_ftl_statistics[bank].gc_cnt++;
 
-    vt_vblock = get_vt_vblock(bank);   // get victim block
-    vcount    = get_vcount(bank, vt_vblock);
+    vt_vblock = get_vt_vblock(bank); // get victim block
+    vcount = get_vcount(bank, vt_vblock);
     gc_vblock = get_gc_vblock(bank);
-    free_vpn  = gc_vblock * PAGES_PER_BLK;
+    free_vpn = gc_vblock * PAGES_PER_BLK;
 
-/*     uart_printf("garbage_collection bank %d, vblock %d",bank, vt_vblock); */
+    /*     uart_printf("garbage_collection bank %d, vblock %d",bank, vt_vblock); */
 
     ASSERT(vt_vblock != gc_vblock);
     ASSERT(vt_vblock >= META_BLKS_PER_BANK && vt_vblock < VBLKS_PER_BANK);
@@ -679,7 +684,7 @@ static void garbage_collection(UINT32 const bank)
     // 1. load p2l list from last page offset of victim block (4B x PAGES_PER_BLK)
     // fix minor bug
     nand_page_ptread(bank, vt_vblock, PAGES_PER_BLK - 1, 0,
-                     ((sizeof(UINT32) * PAGES_PER_BLK + BYTES_PER_SECTOR - 1 ) / BYTES_PER_SECTOR), FTL_BUF(bank), RETURN_WHEN_DONE);
+                     ((sizeof(UINT32) * PAGES_PER_BLK + BYTES_PER_SECTOR - 1) / BYTES_PER_SECTOR), FTL_BUF(bank), RETURN_WHEN_DONE);
     mem_copy(g_misc_meta[bank].lpn_list_of_cur_vblock, FTL_BUF(bank), sizeof(UINT32) * PAGES_PER_BLK);
     // 2. copy-back all valid pages to free space
     for (src_page = 0; src_page < (PAGES_PER_BLK - 1); src_page++)
@@ -722,14 +727,14 @@ static void garbage_collection(UINT32 const bank)
     ASSERT((free_vpn % PAGES_PER_BLK) < (PAGES_PER_BLK - 2));
     ASSERT((free_vpn % PAGES_PER_BLK == vcount));
 
-/*     uart_printf("gc page count : %d", vcount); */
+    /*     uart_printf("gc page count : %d", vcount); */
 
     // 4. update metadata
     set_vcount(bank, vt_vblock, VC_MAX);
     set_vcount(bank, gc_vblock, vcount);
     set_new_write_vpn(bank, free_vpn); // set a free page for new write
-    set_gc_vblock(bank, vt_vblock); // next free block (reserve for GC)
-    dec_full_blk_cnt(bank); // decrease full block count
+    set_gc_vblock(bank, vt_vblock);    // next free block (reserve for GC)
+    dec_full_blk_cnt(bank);            // decrease full block count
     /* uart_print("garbage_collection end"); */
 }
 //-------------------------------------------------------------

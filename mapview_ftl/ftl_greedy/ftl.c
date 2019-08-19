@@ -386,7 +386,7 @@ void ftl_read(UINT32 const lba, UINT32 const num_sectors)
                     UINT32 target_lsn = (lba + num_mapview_count) / SECTORS_PER_PAGE;
                     UINT32 target_vpn = get_vpn(target_lsn);
                     write_dram_32(RD_BUF_PTR(g_ftl_read_buf_id) + sect_offset * BYTES_PER_SECTOR + count * 4,
-                                  target_vpn);
+                                  target_vpn + PAGES_PER_BANK * bank);
                 }
             }
             else
